@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="table-responsive">
+  <table class="table table-bordered">
+    <thead>
+    <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Name (Quantity)</th>
+      </tr>
+    {%for data,date,quantity,unit in Data%}
+      <tr>
+        <td>{{date[0]}}</td>
+        <td>{% for dItem,qItem,uItem in dataQuantityAndUnit  %}
+        
+        {% for (d,q,u) in zip(dItem,qItem,uItem)%} {{d}} ({{q}} {{u}}) 
+        {% if loop.nextitem is defined %}
+        +
+        {% endif %}
+        {%endfor%}
+        {%break%}
+        {%endfor%}</td>
+      </tr>
+    </thead>
+      {%endfor%}
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

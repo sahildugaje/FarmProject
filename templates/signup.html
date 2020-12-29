@@ -1,0 +1,16 @@
+{% extends "base-disable-nav.html" %}
+
+{% block content %}
+   <div class="div-center" style="margin-top: 20%">
+    <h2 align = "center">Sign Up!</h2>
+       <div class="center-block well div-center" >
+       <form action = "/signUp" method = "POST" align = "center" class="div-center">
+          <input type ="email" name = "email" class="form-control" placeholder="Email" required><br>
+          <input type ="password" name = "password" class="form-control" placeholder="Password" required><br>
+          <input type ="Mobile" name = "mobile" class="form-control" placeholder="Mobile"><br>
+          <input type = "submit" class="btn btn-success btn-block" value = "Sign Up" >
+      </div>
+    </form>
+  </div>
+  </form>
+{% endblock %}

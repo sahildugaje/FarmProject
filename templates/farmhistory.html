@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block html_head %}
+
+<style>
+ul.ks-cboxtags {
+    list-style: none;
+    padding: 10px;
+}
+ul.ks-cboxtags li{
+  display: inline;
+}
+ul.ks-cboxtags li label{
+    display: inline-block;
+    background-color: rgba(255, 255, 255, .9);
+    border: 1px solid rgba(139, 139, 139, 4.3);
+    color: black;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin: 2px 0%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .1s;
+}
+
+ul.ks-cboxtags li label {
+    padding: 2px 25%;
+    cursor: pointer;
+}
+
+ul.ks-cboxtags li label::before {
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    font-family: "Font Awesome 5 Free";     
+    font-weight: 100;
+    font-size: 12px;
+    padding: 1px 2px 2px 2px;
+    content: "\f007";
+    transition: transform .1s ease-in-out;
+    margin: 3px -20px;
+}
+
+ul.ks-cboxtags li input[type="radio"]:checked + label::before {
+    content: "\f00c";
+}
+
+ul.ks-cboxtags li input[type="radio"]:checked + label {
+    border: 2px solid white;
+    background-color: #12bbd4;
+    color: #fff;
+    transition: all .2s;
+}
+
+ul.ks-cboxtags li input[type="radio"] {
+  display: relative;
+}
+ul.ks-cboxtags li input[type="radio"] {
+  position: relative;
+  opacity: 0;
+}
+ul.ks-cboxtags li input[type="radio"]:focus + label {
+  border: 2px solid white;
+}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<form action={{url_for('showData')}} class = "form" method="POST">
+
+<ul class="ks-cboxtags" style="text-align:start; padding:0px 3% 0px 3%">
+	{% for items in farmIdAndName %}
+	<li><input type="radio" name="farm" id="{{items[0]}}" value="{{items[0]}}"><label style="width: 100%; font-weight: 100;" for="{{items[0]}}">{{items[1]}}</label></li>
+	<br>
+  	{% endfor %}
+</ul><br><br>
+<div align="center">
+<input type = "submit" class="btn btn-warning btn-block" value = "See History" onclick="return func();" style="background:#FEBB33; border-color: inherit; font-size:16px"></p>
+
+</div>
+   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(window).on('beforeunload', function () {
+            $("input[type=submit], input[type=button]").prop("disabled", "disabled");
+        });
+    </script>
+
+</form>
+
+
+{% endblock %}

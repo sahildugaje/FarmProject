@@ -1,0 +1,18 @@
+{% extends "base-disable-nav.html" %}
+
+{% block content %}
+
+    <div class="div-center" style="margin-top: 20%">
+    <h2 align = "center">Log In!</h2>
+      <div class="center-block well div-center" >
+        <form action = "/signin" method = "POST" align = "center" class="div-center">
+      
+          <input type ="email" name = "email" class="form-control" placeholder="Email or Mobile Number" required><br>
+
+          <input type ="password" name = "password" class="form-control" placeholder="Password" required><br>
+          <input type = "submit" class="btn btn-success btn-block" value = "LOG IN" >
+        </form>
+      </div>
+    </div>
+ <div align="center" style="padding-bottom: 0px;"> Don’t have an account? <a href="/signUpPage" >Sign up</a></div>
+{% endblock %}

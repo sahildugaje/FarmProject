@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block html_head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<style> 
+#pageloader
+{
+  background: rgba( 255, 255, 255, 0.8 );
+  display: none;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  z-index: 9999;
+}
+
+#pageloader img
+{
+  left: 50%;
+  margin-left: 25px;
+  margin-top: 25px;
+  position: absolute;
+  top: 50%;
+}
+</style>
+
+{% endblock %}
+{% block content %}
+<div id="pageloader" height="100%" widht="100%" align = "center">
+     <img src="https://i.pinimg.com/originals/72/f1/a4/72f1a425e3ea3505929a30b8adabefb8.gif" style='height: 100%; width: 100%; object-fit: contain;' alt="processing..." />
+  </div>
+
+   <br><br>
+  	 {%for i in range(0,data)%}
+	 <form action = "/selectfarm" method = "POST" id="myform" name = "myform" align = "center">
+	<!-- table rows -->
+	<tr> <td>प्लॉट {{i+1}} :</td>
+	    <td><input type ="text" class="form-control" name = {{i}} required="required"><br><br></td>
+	{%endfor%}
+	<p><input type = "submit" class="btn btn-warning btn-block" value = "Submit" onclick="func()"></p>
+   </form>
+    <script type="text/javascript">
+
+        function func(){
+        this.disabled = true;
+        return true;
+        }
+
+    $(document).ready(function(){
+	  $("#myform").on("submit", function(){
+	    $("#pageloader").fadeIn();
+	  });//submit
+	});//document ready
+	</script> 
+{% endblock %}
+

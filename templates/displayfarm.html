@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+   <body>
+    <h1>ningisnsng</h1>
+   <br><br>
+  	 {%for i in range(0,data)%} 
+	 <form action = "/selectfarm" method = "POST" align = "center">
+	<!-- table rows -->
+  	<tr> <td>Farm {{i+1}} :</td>
+  	    <td><input type ="text" name = {{i}}><br><br></td>
+  	{%endfor%} 
+  	<p><input type = "submit" class="btn btn-primary" value = "submit" id="submit"></p>
+   </form>
+   <script type="text/javascript">
+  document.getElementById("submit").onclick = function() {
+    //disable
+    this.disabled = true;
+    }
+    </script>
+   </body>
+</html>
+
