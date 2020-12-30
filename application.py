@@ -20,11 +20,17 @@ def index():
 	
 	mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com', database='FarmData', user='lecture', password='sahild1002')
 	mycursor = mydb.cursor()
-	if(email != None):	
-		mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE email ="'+email+'";')
-	elif(mobile != None):
-		mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE mobile_no = "'+mobile+'";')
-	# mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE email ="'+email+'" or mobile_no = "'+mobile+'";')
+	flag = False
+	if(email != None):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
+		myresult = mycursor.fetchall()
+		if(myresult == []):
+			flag = True
+	if(mobile != None and flag == True):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+		myresult = mycursor.fetchall()
+		
+	mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE email ="'+email+'" or mobile_no = "'+mobile+'";')
 	FarmStepStatus = mycursor.fetchone()
 	if(FarmStepStatus == None):
 		return render_template('signin.html')
@@ -35,11 +41,14 @@ def index():
 		return render_template('numberOfFarms.html')
 	elif(FarmStepStatus[1] != 1):
 		return render_template('selectfarm.html',data = int(numOfFarm))
-	if(email != None):	
+	if(email != None):
 		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
-	elif(mobile != None):
+		myresult = mycursor.fetchall()
+		if(myresult == []):
+			flag = True
+	if(mobile != None and flag == True):
 		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
-	myresult = mycursor.fetchall()
+		myresult = mycursor.fetchall()
 	print(myresult)
 	userId = myresult[0][2]
 	mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id='''+str(userId)+''' ;''')
@@ -118,115 +127,124 @@ def index():
 
 @application.route('/showFarmHistory', methods = ['GET','POST'])
 def showFarmHistory():
-	try:
-		email = session.get('email',None)
-		password = session.get('password',None)
-		userId = session.get('userId',None)
-		mobile = session.get('mobile', None)
-		mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com',
-				         database='FarmData',
-				         user='lecture',
-				         password='sahild1002')
-		mycursor = mydb.cursor()
-		mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id=''' + str(userId) + ''' ;''')
-		farmIdAndName = mycursor.fetchall()
-		if(email != None):
-			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
-		elif(mobile != None):
-			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
-		myresult = mycursor.fetchall()
-		print('myresult : ', myresult)
-		if (email == myresult[0][0] and password == myresult[0][1]):
-			return render_template("farmhistory.html",farmIdAndName=farmIdAndName)
-		else:
-			return render_template("signin.html")
-	except :
-		return jsonify("No data found")
+	# try:
+	email = session.get('email',None)
+	password = session.get('password',None)
+	userId = session.get('userId',None)
+	mobile = session.get('mobile', None)
+	print(email,mobile)
+	mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com',
+			         database='FarmData',
+			         user='lecture',
+			         password='sahild1002')
+	mycursor = mydb.cursor()
+	mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id=''' + str(userId) + ''' ;''')
+	farmIdAndName = mycursor.fetchall()
+	print(farmIdAndName)
+	if(farmIdAndName == []):
+		return render_template("signin.html")
+	# if(email != None):
+	# 	mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
+	# 	print('MYCURSOR :', mycursor)
+	# elif(mobile != None):
+	# 	mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+	# myresult = mycursor.fetchall()
+	# print('myresult : ', myresult)
+	if farmIdAndName != None:
+		return 	render_template("farmhistory.html",farmIdAndName=farmIdAndName)
+	else:
+		return render_template("signin.html")
+	# except :
+	# 	return jsonify("No data found")
 
 @application.route('/showData', methods = ['GET','POST'])
 def showData():
-	try:
-		email = session.get('email',None)
-		password = session.get('password',None)
-		userId = session.get('userId',None)
-		mobile = session.get('mobile', None)
-		mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com',
-		                         database='FarmData',
-		                         user='lecture',
-		                         password='sahild1002')
-		mycursor = mydb.cursor()
-		mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id=''' + str(userId) + ''' ;''')
-		farmIdAndName = mycursor.fetchall()
-
-		if(email != None):
-			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
-		elif(mobile != None):
-			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+	# try:
+	email = session.get('email',None)
+	password = session.get('password',None)
+	userId = session.get('userId',None)
+	mobile = session.get('mobile', None)
+	mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com',
+	                         database='FarmData',
+	                         user='lecture',
+	                         password='sahild1002')
+	mycursor = mydb.cursor()
+	mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id=''' + str(userId) + ''' ;''')
+	farmIdAndName = mycursor.fetchall()
+	# print(email)
+	flag = False
+	if(email != None):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
 		myresult = mycursor.fetchall()
-		
-		if ((email == myresult[0][0] or mobile == myresult[0][3]) and password == myresult[0][1]):
-			if request.method == 'POST':
-				farm = request.form['farm']
-				session['farm'] = farm
-				farmId = session.get('farm', None)
+		if(myresult == []):
+			flag = True
+	if(mobile != None and flag == True):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+		myresult = mycursor.fetchall()
+	# print(myresult)
+	if ((email == myresult[0][0] or mobile == myresult[0][3]) and password == myresult[0][1]):
+		if request.method == 'POST':
+			farm = request.form['farm']
+			session['farm'] = farm
+			farmId = session.get('farm', None)
 
-				mycursor.execute('''SELECT pesticide_name,DATE,pesticide_quantity,UUID,unit FROM user
-						INNER JOIN user_farm_rel ON user_id = uf_user_id
-						INNER JOIN farm ON farm_id = uf_farm_id
-						INNER JOIN farm_pesticide_rel ON farm_id = f_farm_id
-						INNER JOIN data ON f_pesticide_id = d_pesticide_id
-						WHERE user_id =''' + str(userId) + ''' and farm_id = ''' + str(farmId) + ''' ORDER BY DATE ASC;''')
-				data = mycursor.fetchall()
-				#print(data)
-				flag = 0
-				listData =[]
-				listDate = []
-				listQuantity = []
-				listUnit = []
-				listData.append([data[0][0]])
-				listDate.append([data[0][1]])
-				listQuantity.append([data[0][2]])
-				listUnit.append([data[0][4]])
-				for i in range(0,len(data)-1):
+			mycursor.execute('''SELECT pesticide_name,DATE,pesticide_quantity,UUID,unit FROM user
+					INNER JOIN user_farm_rel ON user_id = uf_user_id
+					INNER JOIN farm ON farm_id = uf_farm_id
+					INNER JOIN farm_pesticide_rel ON farm_id = f_farm_id
+					INNER JOIN data ON f_pesticide_id = d_pesticide_id
+					WHERE user_id =''' + str(userId) + ''' and farm_id = ''' + str(farmId) + ''' ORDER BY DATE ASC;''')
+			data = mycursor.fetchall()
+			#print(data)
+			flag = 0
+			listData =[]
+			listDate = []
+			listQuantity = []
+			listUnit = []
+			listData.append([data[0][0]])
+			listDate.append([data[0][1]])
+			listQuantity.append([data[0][2]])
+			listUnit.append([data[0][4]])
+			for i in range(0,len(data)-1):
+				
+				if((data[i][3] == data[i+1][3]) and flag == 0):
+					j = len(listData)-1
+
+					#listData.append([data[i][0]])
+					listData[j].extend([data[i+1][0]])
+					listDate[j].extend([data[i+1][1]])
+					listQuantity[j].extend([data[i+1][2]])
+					listUnit[j].extend([data[i+1][4]])
+					flag = 1
 					
-					if((data[i][3] == data[i+1][3]) and flag == 0):
-						j = len(listData)-1
-
-						#listData.append([data[i][0]])
-						listData[j].extend([data[i+1][0]])
-						listDate[j].extend([data[i+1][1]])
-						listQuantity[j].extend([data[i+1][2]])
-						listUnit[j].extend([data[i+1][4]])
-						flag = 1
-						
-					elif((data[i][3] == data[i+1][3]) and flag == 1):
-						listData[j].extend([data[i+1][0]])
-						listDate[j].extend([data[i+1][1]])
-						listQuantity[j].extend([data[i+1][2]])
-						listUnit[j].extend([data[i+1][4]])
-					else:
-						if(i == len(data)-1):
-							listData.append([data[i][0]])
-							listDate.append([data[i][1]])
-							listQuantity.append([data[i][2]])
-							listUnit.append([data[i][4]])
-							break
-						listData.append([data[i+1][0]])
-						listDate.append([data[i+1][1]])
-						listQuantity.append([data[i+1][2]])
-						listUnit.append([data[i+1][4]])
-						flag = 0
-				#print("listUnit :",listUnit)
-				return render_template('table.html', Data=zip(listData,listDate,listQuantity,listUnit),dataQuantityAndUnit=zip(listData,listQuantity,listUnit),zip=zip)
-		else:
-			return render_template("signin.html")
-	except:
-		mycursor.execute('SELECT pesticide_name FROM data;')
-		pesticide = mycursor.fetchall()
-		pesticideList =[]
-		for pItems in pesticide:
-			pesticideList.append(pItems[0])
-		return '{} {}'.format("<script>alert('No Data Found')</script>", render_template('index.html',userId = int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList))
+				elif((data[i][3] == data[i+1][3]) and flag == 1):
+					listData[j].extend([data[i+1][0]])
+					listDate[j].extend([data[i+1][1]])
+					listQuantity[j].extend([data[i+1][2]])
+					listUnit[j].extend([data[i+1][4]])
+				else:
+					if(i == len(data)-1):
+						listData.append([data[i][0]])
+						listDate.append([data[i][1]])
+						listQuantity.append([data[i][2]])
+						listUnit.append([data[i][4]])
+						break
+					listData.append([data[i+1][0]])
+					listDate.append([data[i+1][1]])
+					listQuantity.append([data[i+1][2]])
+					listUnit.append([data[i+1][4]])
+					flag = 0
+			#print("listUnit :",listUnit)
+			return render_template('table.html', Data=zip(listData,listDate,listQuantity,listUnit),dataQuantityAndUnit=zip(listData,listQuantity,listUnit),zip=zip)
+	else:
+		return render_template("signin.html")
+	# except:
+	# 	mycursor.execute('SELECT pesticide_name FROM data;')
+	# 	pesticide = mycursor.fetchall()
+	# 	pesticideList =[]
+	# 	for pItems in pesticide:
+	# 		pesticideList.append(pItems[0])
+	# 	return '{} {}'.format("<script>alert('No Data Found')</script>", render_template('index.html',userId = int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList))
 
 	
 @application.route('/signUpPage', methods = ['GET','POST'])
