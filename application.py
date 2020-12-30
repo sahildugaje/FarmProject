@@ -376,8 +376,12 @@ def selectfarm():
 			mydb.commit()	
 			mycursor.execute('UPDATE user SET nameOfFarmStepStatus = 1 WHERE email = "'+str(email)+'";')
 			mydb.commit()
-	mycursor.execute('SELECT pesticide_name,d_pesticide_id FROM data;')
-	pesticideList = mycursor.fetchall() 
+	mycursor.execute('SELECT pesticide_name FROM data;')
+	pesticide = mycursor.fetchall()
+	pesticideList =[]
+	for pItems in pesticide:
+		pesticideList.append(pItems[0])
+	print('Pesticidelist : ',pesticideList)
 	mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id='''+str(userId)+''' ;''')
 	farmIdAndName = mycursor.fetchall()
 	return render_template("index.html",userId = int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList)
