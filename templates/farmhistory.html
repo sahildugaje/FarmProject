@@ -28,7 +28,7 @@ ul.ks-cboxtags li label{
 }
 
 ul.ks-cboxtags li label {
-    padding: 6px 25%;
+    padding: 8px 25%;
     cursor: pointer;
 }
 
@@ -76,7 +76,7 @@ ul.ks-cboxtags li input[type="radio"]:focus + label {
 
 <ul class="ks-cboxtags" style="text-align:start; padding:0px 3% 0px 3%">
 	{% for items in farmIdAndName %}
-	<li><input type="radio" name="farm" id="{{items[0]}}" value="{{items[0]}}"><label style="width: 100%; font-weight: 100;" for="{{items[0]}}">{{items[1]}}</label></li>
+	<li><input type="radio" name="farm" id="{{items[0]}}" value="{{items[0]}}"><label style="width: 100%; font-weight: 100; font-size: 16px;" for="{{items[0]}}">{{items[1]}}</label></li>
 	<br>
   	{% endfor %}
 </ul><br><br>
