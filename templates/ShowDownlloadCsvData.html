@@ -72,16 +72,16 @@ ul.ks-cboxtags li input[type="radio"]:focus + label {
 {% endblock %}
 
 {% block content %}
-<form action={{url_for('showData')}} class = "form" method="POST">
+<form action={{url_for('submitCsvData')}} class = "form" method="POST">
 
 <ul class="ks-cboxtags" style="text-align:start; padding:0px 3% 0px 3%">
-	{% for items in farmIdAndName %}
-	<li><input type="radio" name="farm" id="{{items[0]}}" value="{{items[0]}}"><label style="width: 100%; font-weight: 100; font-size: 16px;" for="{{items[0]}}">{{items[1]}}</label></li>
-	<br>
-  	{% endfor %}
+  {% for items in farmIdAndName %}
+  <li><input type="radio" name="farm" id="{{items[0]}}" value="{{items[0]}}"><label style="width: 100%; font-weight: 100; font-size: 16px;" for="{{items[0]}}">{{items[1]}}</label></li>
+  <br>
+    {% endfor %}
 </ul><br><br>
 <div align="center">
-<input type = "submit" class="btn btn-warning btn-block" value = "See History" onclick="return func();" style="background:#FEBB33; border-color: inherit; font-size:18px"></p>
+<input type = "submit" class="btn btn-warning btn-block" value = "Download" onclick="return func();" style="background:#FEBB33; border-color: inherit; font-size:18px"></p>
 
 </div>
    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -94,4 +94,10 @@ ul.ks-cboxtags li input[type="radio"]:focus + label {
 </form>
 
 
+<script>
+   function func(){
+    alert("File Downloaded");
+    return true;
+   }
+</script>
 {% endblock %}

@@ -457,17 +457,114 @@ def logOut():
 	if request.method == 'POST' or request.method == 'GET':
 		session.clear()
 		return render_template("signin.html")
-@application.route('/downloadPDF', methods = ['GET'])
-def downloadPDF():
+
+@application.route('/downloadCsv', methods = ['GET'])
+def downloadCsv():
 	if request.method == 'GET':
-	# with open("outputs/Adjacency.csv") as fp:
-	#     csv = fp.read()
-		csv = '1,2,3\n4,5,6\n'
-		return Response(
+		email = session.get('email', None)
+		userId = session.get('userId', None)
+		password = session.get('password', None)
+		mobile = session.get('mobile', None)
+		# print(email, password, mobile)
+		
+		mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com', database='FarmData', user='lecture', password='sahild1002')
+		mycursor = mydb.cursor()
+		myresult = None
+		flag = False
+		if(email != None):
+			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
+			myresult = mycursor.fetchall()
+			if(myresult == []):
+				flag = True
+		if(mobile != None and flag == True):
+			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+			myresult = mycursor.fetchall()
+
+		if(myresult == None):
+			return render_template("signin.html")
+		userId = myresult[0][2]
+		mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id='''+str(userId)+''' ;''')
+		farmIdAndName = mycursor.fetchall()
+		print(farmIdAndName)
+		return render_template("ShowDownlloadCsvData.html",userId=int(userId),farmIdAndName=farmIdAndName)
+
+@application.route('/submitCsvData', methods = ['POST'])
+def submitCsvData():
+	userId = session.get('userId', None)
+	farmId = request.form['farm']
+	print(farmId)
+	mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com', database='FarmData', user='lecture', password='sahild1002')
+	mycursor = mydb.cursor()
+
+	mycursor.execute(f'SELECT farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id where uf_user_id = {userId} and farm_id = {farmId};')
+	farmName = mycursor.fetchone()
+	print("FarmName :", farmName)
+
+	mycursor.execute('''SELECT pesticide_name,DATE,pesticide_quantity,UUID,unit FROM user
+						INNER JOIN user_farm_rel ON user_id = uf_user_id
+						INNER JOIN farm ON farm_id = uf_farm_id
+						INNER JOIN farm_pesticide_rel ON farm_id = f_farm_id
+						INNER JOIN data ON f_pesticide_id = d_pesticide_id
+						WHERE user_id =''' + str(userId) + ''' and farm_id = ''' + str(farmId) + ''' ORDER BY DATE ASC;''')
+	data = mycursor.fetchall()
+	print(data)
+
+	flag = 0
+	listData =[]
+	listDate = []
+	listQuantity = []
+	listUnit = []
+	listData.append([data[0][0]])
+	listDate.append([data[0][1]])
+	listQuantity.append([data[0][2]])
+	listUnit.append([data[0][4]])
+	for i in range(0,len(data)-1):
+		
+		if((data[i][3] == data[i+1][3]) and flag == 0):
+			j = len(listData)-1
+
+			#listData.append([data[i][0]])
+			listData[j].extend([data[i+1][0]])
+			listDate[j].extend([data[i+1][1]])
+			listQuantity[j].extend([data[i+1][2]])
+			listUnit[j].extend([data[i+1][4]])
+			flag = 1
+			
+		elif((data[i][3] == data[i+1][3]) and flag == 1):
+			listData[j].extend([data[i+1][0]])
+			listDate[j].extend([data[i+1][1]])
+			listQuantity[j].extend([data[i+1][2]])
+			listUnit[j].extend([data[i+1][4]])
+		else:
+			if(i == len(data)-1):
+				listData.append([data[i][0]])
+				listDate.append([data[i][1]])
+				listQuantity.append([data[i][2]])
+				listUnit.append([data[i][4]])
+				break
+			listData.append([data[i+1][0]])
+			listDate.append([data[i+1][1]])
+			listQuantity.append([data[i+1][2]])
+			listUnit.append([data[i+1][4]])
+			flag = 0
+	# print("listData : ", listData)
+	# print("listDate :", listDate[0])
+	# print("listQuantity :", listQuantity)
+	# print("listUnit :", listUnit)
+	csv = "Date, Pesticide 1, Pesticide 2, Pesticide 3, Pesticide 4, Pesticide 5\n"
+	for data, date, quantity, unit in zip(listData, listDate, listQuantity, listUnit):
+		csv = csv + str(date[0]) +','
+		for dt, qu, un in zip(data, quantity, unit):
+			csv = csv + str(dt)+"(" + str(qu)+")" + str(un)
+			csv = csv + ","
+		csv = csv + '\n'
+	print("csv :", csv)
+	# csv = '1,2,3\n4,5,6\n'
+	return Response(
 		csv,
 		mimetype="text/csv",
 		headers={"Content-disposition":
-		         "attachment; filename=myplot.csv"})
+		         "attachment; filename="+farmName[0]+".csv"})
 
 if (__name__ == "__main__"):
 	application.run(host='0.0.0.0',port=5000, debug = True)

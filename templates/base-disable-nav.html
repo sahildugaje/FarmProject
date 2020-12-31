@@ -5,6 +5,15 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https: //maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
+<style type="text/css">
+  a.disabled {
+  pointer-events: none;
+  cursor: default;
+}
+
+</style>
+
+
 {% block html_head %}
   <title>{% block title %}{% endblock %} - GreenFarm</title>
 {% endblock %}
@@ -26,13 +35,13 @@
     <div class="collapse navbar-collapse" id="myNavbar">
     <form method="POST">
       <ul class="nav navbar-nav">
-        <li class="active"><a href={{url_for("index")}}>Home</a></li>
-        <li><a href={{url_for("showFarmHistory")}}>Farm History</a></li>
-        <li><a href="#">Download PDF</a></li>
+        <li class="active"><a href={{url_for("index")}} class = "disabled">Home</a></li>
+        <li><a href={{url_for("showFarmHistory")}} class = "disabled">Farm History</a></li>
+        <li><a href={{url_for("downloadPDF")}} class = "disabled">Download File</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href={{url_for("signUpPage")}}><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-        <li><a href={{url_for("logOut")}}><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        <li><a href={{url_for("logOut")}} class = "disabled"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
       </ul>
       </form>
     </div>

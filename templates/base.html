@@ -11,11 +11,7 @@
  {% endblock %}
  
 </head>
-<!--https://hougumlaw.com/wp-content/uploads/2016/05/light-website-backgrounds-light-color-background-images-light-color-background-images-for-website-1024x640.jpg
-
-https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkPOS-Kc42aRRxFpqedxu30cmCDiOEEApk2Q&usqp=CAUS
-  <body background= "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoGASuG8-QdhYfql8OaOjRUvv8tb-zaAXOSA&usqp=CAU">    -->
-    <body style="background-color:#D7D7D7;">
+  <body style="background-color:#D7D7D7;">
 
   <div id="loader" class="center"></div> 
     
@@ -34,7 +30,7 @@ https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkPOS-Kc42aRRxFpqedxu30cmC
       <ul class="nav navbar-nav">
         <li class="active"><a href={{url_for("index")}}>Home</a></li>
         <li><a href={{url_for("showFarmHistory")}}>Farm History</a></li>
-        <li><a href="#">Download PDF</a></li>
+        <li><a href={{url_for("downloadCsv")}}>Download PDF</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href={{url_for("signUpPage")}}><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
