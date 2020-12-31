@@ -12,16 +12,42 @@ application.jinja_env.add_extension('jinja2.ext.loopcontrols')
 
 @application.route('/', methods=['GET', 'POST'])
 def index():
-	try:
-		email = session.get('email', None)
-		password = session.get('password', None)
-		mobile = session.get('mobile', None)
-		# print(email, password, mobile)
-		
-		mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com', database='FarmData', user='lecture', password='sahild1002')
-		mycursor = mydb.cursor()
-		myresult = None
-		flag = False
+	# try:
+	email = session.get('email', None)
+	password = session.get('password', None)
+	mobile = session.get('mobile', None)
+	userId = session.get('userId', None)
+	# print(email, password, mobile)
+	
+	mydb = mysql.connector.connect(host='lecture.cechxabyoyas.ap-south-1.rds.amazonaws.com', database='FarmData', user='lecture', password='sahild1002')
+	mycursor = mydb.cursor()
+	myresult = None
+	flag = False
+	if(email != None):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
+		myresult = mycursor.fetchall()
+		if(myresult == []):
+			flag = True
+	if(mobile != None and flag == True):
+		mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
+		myresult = mycursor.fetchall()
+
+	if(myresult == None):
+		return render_template("signin.html")
+
+	
+	if((email == myresult[0][0] or mobile == myresult[0][3]) and password == myresult[0][1]):
+		mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE email ="'+email+'" or mobile_no = "'+mobile+'";')
+		FarmStepStatus = mycursor.fetchone()
+		if(FarmStepStatus == None):
+			return render_template('signin.html')
+		# print("FarmStepStatus : ",FarmStepStatus)
+
+		numOfFarm = FarmStepStatus[2]
+		if(FarmStepStatus[0] != 1):
+			return render_template('numberOfFarms.html')
+		elif(FarmStepStatus[1] != 1):
+			return render_template('selectfarm.html',data = int(numOfFarm))
 		if(email != None):
 			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
 			myresult = mycursor.fetchall()
@@ -29,106 +55,81 @@ def index():
 				flag = True
 		if(mobile != None and flag == True):
 			mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
-			myresult = mycursor.fetchall()
+			myresult = mycursor.fetchall()	
+		# print(myresult)
+		userId = myresult[0][2]
+		mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id='''+str(userId)+''' ;''')
+		farmIdAndName = mycursor.fetchall()
+		mycursor.execute('SELECT pesticide_name FROM data;')
+		pesticide = mycursor.fetchall()
+		pesticideList =[]
+		for pItems in pesticide:
+			pesticideList.append(pItems[0])
+		# except:
+		# 	return render_template('signin.html')
+		#try:
+		mycursor.execute('SELECT d_pesticide_id,pesticide_name FROM data;')
+		pesticideIdAndName = mycursor.fetchall()
+		# print("pesticideIdAndName : ", pesticideIdAndName)
+		farmIdList =[]
+		quantity = []
+		pesticideName = []
+		unit = []
+		if request.method == 'POST':
+			farmD = request.form.to_dict()
+			#return jsonify(farmD)
+			for item in farmD:
+				#print("item : ",item)
+				if(item.isnumeric()):
+					farmIdList.append(item)
+				elif(re.findall("textbox", item)):
+					pesticideName.append(farmD["textbox"+item[-1]])
+				elif(re.findall("quantity",item)):
+					quantity.append(farmD["quantity"+item[-1]])
+				elif(re.findall("unit",item)):
+					unit.append(farmD["unit"+item[-1]])
+			#return jsonify(farmIdList,pesticideName,quantity,unit)
+			totalPesticidesInDb = int(pesticideIdAndName[-1][0])
+			j = 1
+			for listEle in farmIdList:
+				id = uuid.uuid1()
+				i = 0
+				for pesticideItem,u in zip(pesticideName,unit):
 
-		if(myresult == None):
-			return render_template("signin.html")
-
-		
-		if((email == myresult[0][0] or mobile == myresult[0][3]) and password == myresult[0][1]):
-			mycursor.execute('SELECT numOfFarmStepStatus,nameOfFarmStepStatus,numOfFarm FROM user WHERE email ="'+email+'" or mobile_no = "'+mobile+'";')
-			FarmStepStatus = mycursor.fetchone()
-			if(FarmStepStatus == None):
-				return render_template('signin.html')
-			# print("FarmStepStatus : ",FarmStepStatus)
-
-			numOfFarm = FarmStepStatus[2]
-			if(FarmStepStatus[0] != 1):
-				return render_template('numberOfFarms.html')
-			elif(FarmStepStatus[1] != 1):
-				return render_template('selectfarm.html',data = int(numOfFarm))
-			if(email != None):
-				mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE email ="'+email+'";')
-				myresult = mycursor.fetchall()
-				if(myresult == []):
-					flag = True
-			if(mobile != None and flag == True):
-				mycursor.execute('SELECT email,passw,user_id,mobile_no FROM user WHERE mobile_no ="'+mobile+'";')
-				myresult = mycursor.fetchall()	
-			# print(myresult)
-			userId = myresult[0][2]
-			mycursor.execute('''SELECT farm_id,farm_name FROM user_farm_rel INNER JOIN farm ON uf_farm_id = farm_id WHERE uf_user_id='''+str(userId)+''' ;''')
-			farmIdAndName = mycursor.fetchall()
+					for items in pesticideIdAndName:
+						if (items[1] == pesticideItem):
+							mycursor.execute('''INSERT INTO farm_pesticide_rel(f_farm_id,f_pesticide_id,pesticide_quantity,DATE,UUID,unit) VALUES(''' + str(listEle) + ''',''' + str(items[0]) + ''',''' + str(quantity[i]) + ''',convert_tz(NOW(),'+00:00','+05:30'),"'''+str(id)+'''","'''+str(u)+'''");''')
+							mydb.commit()
+							i = i + 1
+							# print('Data Inserted', pesticideItem)
+							break
+					else:
+						# print('pesticideItem',pesticideItem)
+						addPesticide = totalPesticidesInDb + j
+						mycursor.execute('SELECT pesticide_name FROM data WHERE pesticide_name = "'+pesticideItem+'";')
+						pesticideName = mycursor.fetchall()
+						# print("data repeat :", pesticideName)
+						# return jsonify(pesticideName)
+						if pesticideName == []:
+						
+							# print("quantity[i] : ",quantity, i)
+							# print("data inserted",pesticideItem)
+							mycursor.execute('INSERT INTO data(d_pesticide_id,pesticide_name) VALUES(' + str(addPesticide) + ',UPPER("' + str(pesticideItem) + '"));')
+							j = j + 1
+							mydb.commit()
+							mycursor.execute('''INSERT INTO farm_pesticide_rel(f_farm_id,f_pesticide_id,pesticide_quantity,DATE,UUID,unit) VALUES(''' + str(listEle) + ''',''' + str(addPesticide) + ''',''' + str(quantity[i]) + ''',convert_tz(NOW(),'+00:00','+05:30'),"'''+str(id)+'''","'''+str(u)+'''");''')
+							mydb.commit()
+							i = i + 1
 			mycursor.execute('SELECT pesticide_name FROM data;')
 			pesticide = mycursor.fetchall()
 			pesticideList =[]
 			for pItems in pesticide:
 				pesticideList.append(pItems[0])
-			# except:
-			# 	return render_template('signin.html')
-			#try:
-			mycursor.execute('SELECT d_pesticide_id,pesticide_name FROM data;')
-			pesticideIdAndName = mycursor.fetchall()
-			# print("pesticideIdAndName : ", pesticideIdAndName)
-			farmIdList =[]
-			quantity = []
-			pesticideName = []
-			unit = []
-			if request.method == 'POST':
-				farmD = request.form.to_dict()
-				#return jsonify(farmD)
-				for item in farmD:
-					#print("item : ",item)
-					if(item.isnumeric()):
-						farmIdList.append(item)
-					elif(re.findall("textbox", item)):
-						pesticideName.append(farmD["textbox"+item[-1]])
-					elif(re.findall("quantity",item)):
-						quantity.append(farmD["quantity"+item[-1]])
-					elif(re.findall("unit",item)):
-						unit.append(farmD["unit"+item[-1]])
-				#return jsonify(farmIdList,pesticideName,quantity,unit)
-				totalPesticidesInDb = int(pesticideIdAndName[-1][0])
-				j = 1
-				for listEle in farmIdList:
-					id = uuid.uuid1()
-					i = 0
-					for pesticideItem,u in zip(pesticideName,unit):
-
-						for items in pesticideIdAndName:
-							if (items[1] == pesticideItem):
-								mycursor.execute('''INSERT INTO farm_pesticide_rel(f_farm_id,f_pesticide_id,pesticide_quantity,DATE,UUID,unit) VALUES(''' + str(listEle) + ''',''' + str(items[0]) + ''',''' + str(quantity[i]) + ''',convert_tz(NOW(),'+00:00','+05:30'),"'''+str(id)+'''","'''+str(u)+'''");''')
-								mydb.commit()
-								i = i + 1
-								# print('Data Inserted', pesticideItem)
-								break
-						else:
-							# print('pesticideItem',pesticideItem)
-							addPesticide = totalPesticidesInDb + j
-							mycursor.execute('SELECT pesticide_name FROM data WHERE pesticide_name = "'+pesticideItem+'";')
-							pesticideName = mycursor.fetchall()
-							# print("data repeat :", pesticideName)
-							# return jsonify(pesticideName)
-							if pesticideName == []:
-							
-								# print("quantity[i] : ",quantity, i)
-								# print("data inserted",pesticideItem)
-								mycursor.execute('INSERT INTO data(d_pesticide_id,pesticide_name) VALUES(' + str(addPesticide) + ',UPPER("' + str(pesticideItem) + '"));')
-								j = j + 1
-								mydb.commit()
-								mycursor.execute('''INSERT INTO farm_pesticide_rel(f_farm_id,f_pesticide_id,pesticide_quantity,DATE,UUID,unit) VALUES(''' + str(listEle) + ''',''' + str(addPesticide) + ''',''' + str(quantity[i]) + ''',convert_tz(NOW(),'+00:00','+05:30'),"'''+str(id)+'''","'''+str(u)+'''");''')
-								mydb.commit()
-								i = i + 1
-				mycursor.execute('SELECT pesticide_name FROM data;')
-				pesticide = mycursor.fetchall()
-				pesticideList =[]
-				for pItems in pesticide:
-					pesticideList.append(pItems[0])
-			return render_template("index.html",userId=int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList)
-		else:
-			return jsonify("Email Not Registered or Password Wrong")
-	except:
-                return '{} {}'.format("<script>alert('Error Occured Please try Again!')</script>", render_template('index.html',userId = int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList))
+		return render_template("index.html",userId=int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList)
+	else:
+		return jsonify("Email Not Registered or Password Wrong")
+	# except:
+ #                return '{} {}'.format("<script>alert('Error Occured Please try Again!')</script>", render_template('index.html',userId = int(userId),farmIdAndName=farmIdAndName,pesticideList=pesticideList))
 
 @application.route('/showFarmHistory', methods = ['GET','POST'])
 def showFarmHistory():
